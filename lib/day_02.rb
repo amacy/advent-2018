@@ -21,4 +21,33 @@ module Day02
 
     twice_count * thrice_count
   end
+
+  def self.common_letters(input=INPUT)
+    input.each do |id|
+      id_letters = id.split(//)
+
+      input.each do |candidate|
+        next if id == candidate
+
+        uncommon_letters = 0
+        uncommon_letter_indices = []
+        candidate_letters = candidate.split(//)
+
+        (0..candidate_letters.length - 1).each do |index|
+          if id_letters[index] == candidate_letters[index]
+            next
+          else
+            uncommon_letter_indices << index
+            uncommon_letters += 1
+          end
+        end
+
+        if uncommon_letters == 1
+          result = id_letters.dup
+          result.delete_at(uncommon_letter_indices.first)
+          return result.join
+        end
+      end
+    end
+  end
 end
