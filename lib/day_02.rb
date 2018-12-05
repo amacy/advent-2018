@@ -1,5 +1,3 @@
-require "set"
-
 module Day02
   INPUT = File.readlines("config/day_02.txt").map(&:chomp)
 
