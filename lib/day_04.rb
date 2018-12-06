@@ -59,6 +59,7 @@ class Day04
 
   def initialize(input)
     @guard_to_min_slept = {}
+    @minute_to_sleeping_guard = {}
     @graph = _generate_graph(input)
   end
 
@@ -80,7 +81,8 @@ class Day04
   end
 
   def strategy_2
-
+    minute, current_guard = @minute_to_sleeping_guard.key(@minute_to_sleeping_guard.values.max)
+    minute * current_guard
   end
 
   def _generate_graph(input)
@@ -94,15 +96,27 @@ class Day04
         graph[entry.julian_date] ||= []
 
         current_guard = entry.text.scan(/\d+/).first.to_i
+
         @guard_to_min_slept[current_guard] ||= 0
       elsif entry.text.include?("falls asleep")
-        graph[entry.julian_date][entry.time.min] = current_guard
+        minute = entry.time.min
+
+        graph[entry.julian_date][minute] = current_guard
+
         @guard_to_min_slept[current_guard] += 1
+
+        @minute_to_sleeping_guard[[minute, current_guard]] ||= 0
+        @minute_to_sleeping_guard[[minute, current_guard]] += 1
+
         sleeping_start_time = entry.time
       elsif entry.text.include?("wakes up")
         (sleeping_start_time.min...entry.time.min).each do |minute|
           graph[entry.julian_date][minute] = current_guard
+
           @guard_to_min_slept[current_guard] += 1
+
+          @minute_to_sleeping_guard[[minute, current_guard]] ||= 0
+          @minute_to_sleeping_guard[[minute, current_guard]] += 1
         end
         sleeping_start_time = nil
       end

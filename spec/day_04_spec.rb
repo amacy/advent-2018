@@ -32,7 +32,7 @@ RSpec.describe Day04 do
   end
 
   context "part 2" do
-    xit "works for the sample input" do
+    it "works for the sample input" do
       input = [
         "[1518-11-01 00:00] Guard #10 begins shift",
         "[1518-11-01 00:05] falls asleep",
@@ -55,8 +55,8 @@ RSpec.describe Day04 do
       expect(Day04.strategy_2(input)).to eq 4455
     end
 
-    xit "works for the input file" do
-      expect(Day04.strategy_2).to eq 26281
+    it "works for the input file" do
+      expect(Day04.strategy_2).to eq 73001
     end
   end
 end
