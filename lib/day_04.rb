@@ -1,6 +1,6 @@
 require "date"
 
-module Day04
+class Day04
   INPUT = File.readlines("config/day_04.txt").map(&:chomp)
 
   class Entry
@@ -50,43 +50,22 @@ module Day04
   end
 
   def self.strategy_1(input=INPUT)
-    graph = {}
-    guard_to_min_slept = {}
-    current_guard = nil
-    sleeping_start_time = nil
-    sleeping = false
+    new(input).strategy_1
+  end
 
-    entries = input.map do |line|
-      Entry.new(line)
-    end.sort { |a, b| a.time <=> b.time }
+  def self.strategy_2(input=INPUT)
+    new(input).strategy_2
+  end
 
-    entries.each do |entry|
-      if entry.text.include?("Guard")
-        graph[entry.julian_date] ||= []
+  def initialize(input)
+    @guard_to_min_slept = {}
+    @graph = _generate_graph(input)
+  end
 
-        current_guard = entry.text.scan(/\d+/).first.to_i
-        guard_to_min_slept[current_guard] ||= 0
-      elsif entry.text.include?("falls asleep")
-        sleeping = true
-        sleeping_start_time = entry.time
-      elsif entry.text.include?("wakes up")
-        sleeping = false
-        (sleeping_start_time.min...entry.time.min).each do |minute|
-          guard_to_min_slept[current_guard] += 1
-          graph[entry.julian_date][minute] = current_guard
-        end
-        sleeping_start_time = nil
-      end
-
-      if sleeping
-        guard_to_min_slept[current_guard] += 1
-        graph[entry.julian_date][entry.time.min] = current_guard
-      end
-    end
-
-    sleepiest_guard = guard_to_min_slept.key(guard_to_min_slept.values.max)
+  def strategy_1
+    sleepiest_guard = @guard_to_min_slept.key(@guard_to_min_slept.values.max)
     sleep_by_minute = {}
-    graph.each_with_index do |(_, row), _|
+    @graph.each_with_index do |(_, row), _|
       next if row.nil?
       row.each_with_index do |guard, minute|
         if guard == sleepiest_guard
@@ -97,7 +76,38 @@ module Day04
     end
 
     most_frequent_minute = sleep_by_minute.key(sleep_by_minute.values.max)
-
     sleepiest_guard * most_frequent_minute
+  end
+
+  def strategy_2
+
+  end
+
+  def _generate_graph(input)
+    entries = input.map { |line| Entry.new(line) }.sort { |a, b| a.time <=> b.time }
+    graph = {}
+    sleeping_start_time = nil
+    current_guard = nil
+
+    entries.each do |entry|
+      if entry.text.include?("Guard")
+        graph[entry.julian_date] ||= []
+
+        current_guard = entry.text.scan(/\d+/).first.to_i
+        @guard_to_min_slept[current_guard] ||= 0
+      elsif entry.text.include?("falls asleep")
+        graph[entry.julian_date][entry.time.min] = current_guard
+        @guard_to_min_slept[current_guard] += 1
+        sleeping_start_time = entry.time
+      elsif entry.text.include?("wakes up")
+        (sleeping_start_time.min...entry.time.min).each do |minute|
+          graph[entry.julian_date][minute] = current_guard
+          @guard_to_min_slept[current_guard] += 1
+        end
+        sleeping_start_time = nil
+      end
+    end
+
+    graph
   end
 end
