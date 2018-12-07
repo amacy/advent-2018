@@ -16,6 +16,28 @@ class Day05
   MAPPING = LOWERCASE_TO_UPPERCASE.merge(UPPERCASE_TO_LOWERCASE)
 
   def self.part_1(input=INPUT)
+    output = _collapse_polymer(input)
+    output.length
+  end
+
+  def self.part_2(input=INPUT)
+    shortest_output = input
+
+    LOWERCASE_TO_UPPERCASE.each do |(lowercase, uppercase)|
+      reduced_input = input.dup
+      # this is really slow
+      reduced_input.delete(lowercase)
+      reduced_input.delete(uppercase)
+      output = _collapse_polymer(reduced_input)
+      if output.length < shortest_output.length
+        shortest_output = output
+      end
+    end
+
+    shortest_output.length
+  end
+
+  def self._collapse_polymer(input)
     remainder = input.dup
     candidate = input.dup
 
@@ -39,7 +61,7 @@ class Day05
       end
 
       if candidate == remainder.compact
-        return candidate.length
+        return candidate
       else
         remainder = remainder.compact
         candidate = remainder
