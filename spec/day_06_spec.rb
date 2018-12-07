@@ -19,4 +19,22 @@ RSpec.describe Day06 do
       expect(Day06.part_1).to eq 4342
     end
   end
+
+  context "part 2" do
+    it "works for the sample input" do
+      input = [
+        [1, 1],
+        [1, 6],
+        [8, 3],
+        [3, 4],
+        [5, 5],
+        [8, 9],
+      ]
+      expect(Day06.part_2(input, 32)).to eq 16
+    end
+
+    it "works for the sample input" do
+      expect(Day06.part_2).to eq 42966
+    end
+  end
 end

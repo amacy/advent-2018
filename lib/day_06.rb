@@ -6,30 +6,8 @@ class Day06
   Coord = Struct.new(:id, :x, :y)
 
   def self.part_1(input=INPUT)
-    coords = []
-    graph = []
+    coords, graph = _generate_coords_and_graph(input)
     coord_id_to_count = {}
-    max_y = 0
-
-    input.each_with_index do |(y, x), id|
-      max_y = y if y > max_y
-      coord = Coord.new(id, x, y)
-      graph[x] ||= []
-      graph[x][y] = coord
-      coords << coord
-    end
-
-    graph = graph.dup.map do |row|
-      if row.nil?
-        r = []
-        r[max_y] = nil
-        r
-      else
-        r = row.dup
-        r[max_y] ||= nil
-        r
-      end
-    end
 
     graph.dup.each_with_index do |row, x|
       row.each_with_index do |coord, y|
@@ -59,12 +37,59 @@ class Day06
     coord_id_to_count.values.max
   end
 
+  def self.part_2(input=INPUT, max_distance_to_all_coords=10_000)
+    coords, graph = _generate_coords_and_graph(input)
+    coords_within_range = 0
+
+    graph.each_with_index do |row, x|
+      row.each_with_index do |_, y|
+        total_distance = coords.inject(0) do |sum, coord|
+          sum += _distance_from_coord(coord, x, y)
+        end
+
+        if total_distance < max_distance_to_all_coords
+          coords_within_range += 1
+        end
+      end
+    end
+
+    coords_within_range
+  end
+
+  def self._generate_coords_and_graph(input)
+    coords = []
+    graph = []
+    max_y = 0
+
+    input.each_with_index do |(y, x), id|
+      max_y = y if y > max_y
+      coord = Coord.new(id, x, y)
+      graph[x] ||= []
+      graph[x][y] = coord
+      coords << coord
+    end
+
+    graph = graph.dup.map do |row|
+      if row.nil?
+        r = []
+        r[max_y] = nil
+        r
+      else
+        r = row.dup
+        r[max_y] ||= nil
+        r
+      end
+    end
+
+    [coords, graph]
+  end
+
   def self._closest_coords(graph, coords, x, y)
     closest_coords = []
     distance_from_closest_coord = graph.length
 
     coords.each do |coord|
-      distance = (x - coord.x).abs + (y - coord.y).abs
+      distance = _distance_from_coord(coord, x, y)
       if distance == distance_from_closest_coord
         closest_coords << coord
       elsif distance < distance_from_closest_coord
@@ -74,5 +99,9 @@ class Day06
     end
 
     closest_coords
+  end
+
+  def self._distance_from_coord(coord, x, y)
+    (x - coord.x).abs + (y - coord.y).abs
   end
 end
