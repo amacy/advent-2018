@@ -9,7 +9,7 @@ class Day08
       @metadata_entry_count = metadata_entry_count
       @parent = parent
       @metadata = []
-      @children = 0
+      @children = []
     end
 
     def add_metadata(metadata)
@@ -20,8 +20,8 @@ class Day08
       @metadata.inject(&:+) || 0
     end
 
-    def add_child
-      @children += 1
+    def add_child(child)
+      @children << child
     end
 
     def metadata_populated?
@@ -29,7 +29,23 @@ class Day08
     end
 
     def children_populated?
-      @children == @expected_children_count
+      @children.length == @expected_children_count
+    end
+
+    def value
+      if @expected_children_count > 0
+        metadata.inject(0) do |sum, index|
+          child = @children[index - 1]
+
+          if child.nil?
+            sum
+          else
+            sum += child.value
+          end
+        end
+      else
+        metadata_total
+      end
     end
   end
 
@@ -39,6 +55,12 @@ class Day08
     nodes.inject(0) do |sum, node|
       sum += node.metadata_total
     end
+  end
+
+  def self.part_2(input=INPUT)
+    nodes = _generate_tree(input)
+
+    nodes.first.value
   end
 
   def self._generate_tree(input)
@@ -58,7 +80,7 @@ class Day08
         end
       else
         child = _create_node(remaining_input, node)
-        node.add_child
+        node.add_child(child)
         nodes << child
         queue.unshift(node)
         queue.unshift(child)
