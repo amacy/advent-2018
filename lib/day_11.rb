@@ -17,13 +17,17 @@ class Day11
 
   def self.part_1(grid_serial_number)
     grid = _grid(grid_serial_number)
-    _max_square(grid, 3).keys.first
+    _max_square(grid, 3).first
   end
 
   def self.part_2(grid_serial_number)
     grid = _grid(grid_serial_number)
-    GRID_RANGE.each do |dimensions|
-      _max_square(grid, dimensions)
+
+    GRID_RANGE.inject({}) do |hash, dimensions|
+      key, value = _max_square(grid, dimensions)
+      key += ",#{dimensions}"
+      hash[key] = value
+      hash
     end
   end
 
@@ -45,9 +49,9 @@ class Day11
     max_square = nil
 
     grid.each do |x, row|
-      break if x == 299
+      break if grid[x + dimensions - 1].nil?
       row.each do |y, _|
-        next if y >= 299
+        next if grid[x][y + dimensions - 1].nil?
 
         combinations = Set.new
         sum = 0
@@ -67,6 +71,6 @@ class Day11
       end
     end
 
-    { max_square => max_sum }
+    [max_square, max_sum]
   end
 end

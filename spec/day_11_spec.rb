@@ -22,7 +22,7 @@ RSpec.describe Day11 do
   end
 
   context "part 2" do
-    xit "returns the correct answer for the sample input" do
+    it "returns the correct answer for the sample input" do
       expect(Day11.part_2(18)).to eq "90,269,16"
       expect(Day11.part_2(42)).to eq "232,251,12"
     end
