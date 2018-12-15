@@ -1,3 +1,5 @@
+require "set"
+
 class Day11
   GRID_RANGE = 1..300
 
@@ -14,42 +16,57 @@ class Day11
   end
 
   def self.part_1(grid_serial_number)
+    grid = _grid(grid_serial_number)
+    _max_square(grid, 3).keys.first
+  end
+
+  def self.part_2(grid_serial_number)
+    grid = _grid(grid_serial_number)
+    GRID_RANGE.each do |dimensions|
+      _max_square(grid, dimensions)
+    end
+  end
+
+  def self._grid(serial_number)
     grid = {}
-    squares = {}
 
     GRID_RANGE.each do |x|
       grid[x] ||= {}
       GRID_RANGE.each do |y|
-        grid[x][y] ||= FuelCell.new(x, y).power_level(grid_serial_number)
+        grid[x][y] ||= FuelCell.new(x, y).power_level(serial_number)
       end
     end
 
-    max_square = 0
-    max_square_x_y = nil
+    grid
+  end
+
+  def self._max_square(grid, dimensions)
+    max_sum = 0
+    max_square = nil
 
     grid.each do |x, row|
       break if x == 299
-      row.each do |y, power_level|
+      row.each do |y, _|
         next if y >= 299
-        squares[x] ||= {}
-        sum = power_level +
-          grid[x+1][y] +
-          grid[x+2][y] +
-          grid[x][y+1] +
-          grid[x][y+2] +
-          grid[x+1][y+1] +
-          grid[x+2][y+1] +
-          grid[x+1][y+2] +
-          grid[x+2][y+2]
-        squares[x][y] = sum
 
-        if sum > max_square
-          max_square_x_y = "#{x},#{y}"
-          max_square = sum
+        combinations = Set.new
+        sum = 0
+        (0..dimensions-1).each do |x_modifier|
+          (0..dimensions-1).each do |y_modifier|
+            key = [x+x_modifier, y+y_modifier]
+            next if combinations.include?(key)
+            sum += grid[x+x_modifier][y+y_modifier]
+            combinations << key
+          end
+        end
+
+        if sum > max_sum
+          max_square = "#{x},#{y}"
+          max_sum = sum
         end
       end
     end
 
-    max_square_x_y
+    { max_square => max_sum }
   end
 end

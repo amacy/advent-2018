@@ -20,4 +20,15 @@ RSpec.describe Day11 do
       expect(Day11.part_1(7689)).to eq "20,37"
     end
   end
+
+  context "part 2" do
+    xit "returns the correct answer for the sample input" do
+      expect(Day11.part_2(18)).to eq "90,269,16"
+      expect(Day11.part_2(42)).to eq "232,251,12"
+    end
+
+    xit "returns the correct answer for the puzzle input" do
+      expect(Day11.part_2(7689)).to eq "20,37"
+    end
+  end
 end
