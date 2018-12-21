@@ -1,8 +1,10 @@
+require "set"
+
 class Day10
   INPUT = File.readlines("config/day_10.txt")
 
   class Node
-    attr_reader :x, :y, :horizontal_movement, :veritical_movement
+    attr_reader :horizontal_movement, :veritical_movement
     attr_accessor :row_number, :column_number
 
     def initialize(x, y, horizontal_movement, veritical_movement)
@@ -24,115 +26,109 @@ class Day10
       @column_number = column_number
       @row_number = row_number
     end
+
+    def row_value
+      @y
+    end
+
+    def column_value
+      @x
+    end
   end
 
   def self.part_1(seconds, input=INPUT)
     nodes = []
-    graph = []
-    x_values = []
-    y_values = []
+    column_values = SortedSet.new
+    row_values = SortedSet.new
     move_number = 0
     output = []
 
     input.each do |line|
       x, y, horizontal_movement, veritical_movement = line.scan(/\d+|-\d+/).map(&:to_i)
-
-      x_values << x
-      y_values << y
+      column_values << x
+      row_values << y
       nodes << Node.new(x, y, horizontal_movement, veritical_movement)
     end
 
-    x_range = x_values.min..x_values.max
-    y_range = y_values.min..y_values.max
+    row_count = row_values.min.abs + row_values.max + 1
+    column_count = column_values.min.abs + column_values.max + 1
+    graph = _empty_graph(row_count, column_count)
 
-    x_values = []
-    y_values = []
-    y_range.each_with_index do |y, row_number|
-      graph[row_number] ||= []
-      x_range.each_with_index do |x, column_number|
-        graph[row_number][column_number] ||= []
-        node = nodes.find { |node| node.x == x && node.y == y }
-        if node
-          x_values << x
-          y_values << y
-          node.row_number = row_number
-          node.column_number = column_number
-          graph[row_number][column_number] << node
-        end
-      end
+    nodes.each do |node|
+      row_number = row_values.min.abs + node.row_value
+      column_number = column_values.min.abs + node.column_value
+
+      node.row_number = row_number
+      node.column_number = column_number
+      graph[row_number][column_number] << node
     end
 
-    string = graph.map do |row|
-      row.map do |nodes|
-        if nodes.length > 0
-          "#"
-        else
-          "."
-        end
-      end.join
-    end.join("\n")
-    output << string
+    output << _graph_string(graph)
+    binding.pry
 
     seconds.times.map do |i|
       move_number += 1
-      new_graph = _move_nodes(graph, move_number, nodes)
-      string = new_graph.map do |row|
+      new_graph = _move_nodes(row_count, column_count, move_number, nodes)
+      output << _graph_string(new_graph)
+    end
+		# output.each do |o|
+		# 	puts o
+    #   puts "\n"
+		# end
+
+    output
+  end
+
+  # this is too slow. turn the "graph" in to a hash?
+  def self._graph_string(graph)
+    graph.map do |row|
+      if row.flatten.empty?
+        "." * row.length
+      else
         row.map do |nodes|
-          if nodes.length > 0
+          if nodes.nil? || nodes.length > 0
             "#"
           else
             "."
           end
         end.join
-      end.join("\n")
-      output << string
-    end
-		output.each do |o|
-			puts o
-      puts "\n"
-		end
-
-    output
+      end
+    end.join("\n")
   end
 
-  def self._move_nodes(graph, move_number, nodes)
-    new_graph = graph.dup
+  def self._move_nodes(row_count, column_count, move_number, nodes)
+    new_graph = _empty_graph(row_count, column_count)
 
-    graph.each_with_index do |row, row_number|
-      row.each_with_index do |_, column_number|
-        new_graph[row_number][column_number] = []
-        nodes_to_move = nodes.select do |node|
-          _next_column_number(graph, node, column_number) == column_number &&
-            _next_row_number(graph, node, row_number) == row_number &&
-            node.move_count == move_number - 1
-        end
-        if nodes_to_move.length > 0
-          nodes_to_move.each do |node|
-            node.move!(column_number, row_number)
-            new_graph[row_number][column_number] << node
-          end
-        end
-      end
+    nodes.each do |node|
+      column_number = _next_column_number(column_count, node)
+      row_number = _next_row_number(row_count, node)
+      node.move!(column_number, row_number)
+      new_graph[row_number][column_number] << node
     end
 
     new_graph
   end
 
-  def self._next_column_number(graph, node, column_number)
+  def self._next_column_number(column_count, node)
     next_index = node.column_number + node.horizontal_movement
-    if next_index > graph.first.length - 1
-      next_index - graph.first.length - 1
+    if next_index > column_count - 1
+      next_index - column_count - 1
     else
       next_index
     end
   end
 
-  def self._next_row_number(graph, node, row_number)
+  def self._next_row_number(row_count, node)
     next_index = node.row_number + node.veritical_movement
-    if next_index > graph.length - 1
-      next_index - graph.length - 1
+    if next_index > row_count - 1
+      next_index - row_count - 1
     else
       next_index
     end
+  end
+
+  def self._empty_graph(row_count, column_count)
+    row = Array.new(column_count, [])
+    Array.new(row_count, row.dup)
   end
 end
