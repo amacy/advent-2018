@@ -52,7 +52,6 @@ class Day10
 
     row_count = row_values.min.abs + row_values.max + 1
     column_count = column_values.min.abs + column_values.max + 1
-    graph = _empty_graph(row_count, column_count)
 
     nodes.each do |node|
       row_number = row_values.min.abs + node.row_value
@@ -60,16 +59,13 @@ class Day10
 
       node.row_number = row_number
       node.column_number = column_number
-      graph[row_number][column_number] << node
     end
 
-    output << _graph_string(graph)
-    binding.pry
+    output << _graph_string(nodes, row_count, column_count)
 
     seconds.times.map do |i|
       move_number += 1
-      new_graph = _move_nodes(row_count, column_count, move_number, nodes)
-      output << _graph_string(new_graph)
+      output << _graph_string(nodes, row_count, column_count)
     end
 		# output.each do |o|
 		# 	puts o
@@ -79,40 +75,37 @@ class Day10
     output
   end
 
-  # this is too slow. turn the "graph" in to a hash?
-  def self._graph_string(graph)
-    graph.map do |row|
-      if row.flatten.empty?
-        "." * row.length
+  def self._graph_string(nodes, row_count, column_count)
+    output = []
+    new_row = "." * column_count
+    output[row_count - 1] = new_row.dup
+
+    nodes.each do |nodes|
+      output[nodes.row_number] ||= new_row.dup
+      output[nodes.row_number][nodes.column_number] = "#"
+    end
+
+    output.map do |row|
+      if row.nil?
+        new_row.dup
       else
-        row.map do |nodes|
-          if nodes.nil? || nodes.length > 0
-            "#"
-          else
-            "."
-          end
-        end.join
+        row
       end
     end.join("\n")
   end
 
   def self._move_nodes(row_count, column_count, move_number, nodes)
-    new_graph = _empty_graph(row_count, column_count)
-
     nodes.each do |node|
       column_number = _next_column_number(column_count, node)
       row_number = _next_row_number(row_count, node)
       node.move!(column_number, row_number)
-      new_graph[row_number][column_number] << node
     end
-
-    new_graph
   end
 
   def self._next_column_number(column_count, node)
     next_index = node.column_number + node.horizontal_movement
     if next_index > column_count - 1
-      next_index - column_count - 1
+      next_index - column_count + 1
     else
       next_index
     end
@@ -121,14 +114,9 @@ class Day10
   def self._next_row_number(row_count, node)
     next_index = node.row_number + node.veritical_movement
     if next_index > row_count - 1
-      next_index - row_count - 1
+      next_index - row_count + 1
     else
       next_index
     end
-  end
-
-  def self._empty_graph(row_count, column_count)
-    row = Array.new(column_count, [])
-    Array.new(row_count, row.dup)
   end
 end

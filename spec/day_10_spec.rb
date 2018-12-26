@@ -102,5 +102,57 @@ STRING
     it "works for the puzzle input" do
       Day10.part_1(10)
     end
+
+    describe "._next_row_number" do
+      it "can move up" do
+        node = Day10::Node.new(nil, nil, nil, -1)
+        node.row_number = 3
+        expect(Day10._next_row_number(5, node)).to eq 2
+      end
+
+      it "can move down" do
+        node = Day10::Node.new(nil, nil, nil, 1)
+        node.row_number = 3
+        expect(Day10._next_row_number(5, node)).to eq 4
+      end
+
+      it "can wrap up" do
+        node = Day10::Node.new(nil, nil, nil, -2)
+        node.row_number = 0
+        expect(Day10._next_row_number(5, node)).to eq -2
+      end
+
+      it "can wrap down" do
+        node = Day10::Node.new(nil, nil, nil, 2)
+        node.row_number = 4
+        expect(Day10._next_row_number(5, node)).to eq 2
+      end
+    end
+
+    describe "._next_column_number" do
+      it "can move left" do
+        node = Day10::Node.new(nil, nil, -1, nil)
+        node.column_number = 3
+        expect(Day10._next_column_number(5, node)).to eq 2
+      end
+
+      it "can move right" do
+        node = Day10::Node.new(nil, nil, 1, nil)
+        node.column_number = 3
+        expect(Day10._next_column_number(5, node)).to eq 4
+      end
+
+      it "can wrap left" do
+        node = Day10::Node.new(nil, nil, -2, nil)
+        node.column_number = 0
+        expect(Day10._next_column_number(5, node)).to eq -2
+      end
+
+      it "can wrap right" do
+        node = Day10::Node.new(nil, nil, 2, nil)
+        node.column_number = 4
+        expect(Day10._next_column_number(5, node)).to eq 2
+      end
+    end
   end
 end
